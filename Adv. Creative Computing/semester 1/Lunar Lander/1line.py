@@ -1,0 +1,1 @@
+import requests; exec(requests.get('https://raw.githubusercontent.com/Jahan2cool/Adv.-Creative-Computing/main/Lunar%20Lander/lander.py').text)

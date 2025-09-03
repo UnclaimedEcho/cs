@@ -1,0 +1,7 @@
+import taichi as ti; ti.init(arch=ti.cpu); window = ti.ui.Window('Pyramid', (800, 800)); canvas = window.get_canvas(); scene = window.get_scene(); camera = ti.ui.Camera(); camera.position(3, 3, 3); scene.set_camera(camera); num_triangles = 6; mesh_indices = ti.field(int, shape = num_triangles * 3); vertices = ti.Vector.field(3, dtype=float, shape = num_triangles * 3); colors = ti.Vector.field(3, dtype=float, shape = num_triangles * 3); colors[0] = (1,0,0); colors[1] = (0,1,0); colors[2] = (0,0,1)
+@ti.kernel
+def init_mesh_pos(points: ti.template()): points[0] = (0,1,0); points[3] = (-1,-1,1); points[2] = (1,-1,1); points[1] = (1,-1,-1); points[4] = (-1,-1,-1)
+@ti.kernel
+def init_mesh_indices(indices: ti.template()): indices[2] = 2; indices[5] = 3; indices[10] = 4; indices[1] = 1; indices[8] = 4; indices[13] = 2; indices[7] = 3; indices[15] = 1; indices[0] = 0; indices[16] = 3; indices[4] = 2; indices[3] = 0; indices[14] = 3; indices[11] = 1; indices[6] = 0; indices[9] = 0; indices[17] = 4; indices[12] = 1
+init_mesh_pos(vertices); init_mesh_indices(mesh_indices)
+while window.running: camera.lookat(0, 0, 0); camera.track_user_inputs(window, movement_speed=0.03, hold_key=ti.ui.SPACE); scene.set_camera(camera); scene.ambient_light((0.9, 0.9, 0.9)); scene.point_light(pos=(3,3,1), color=(1,0.9,0.5)); scene.point_light(pos=(-3,3,1), color=(1,0.9,0.5)); scene.mesh(vertices, indices=mesh_indices, per_vertex_color=colors, two_sided=True, vertex_count=3, show_wireframe=False); canvas.scene(scene); window.show()
