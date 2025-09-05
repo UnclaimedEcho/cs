@@ -1,0 +1,156 @@
+PRESENT_VERBS = [
+    "accept", "is", "allow", "ask", "believe", "bring", "buy", "call", "carry", "change",
+    "choose", "clean", "close", "come", "consider", "continue", "cut", "decide", "develop",
+    "do", "draw", "drive", "eat", "explain", "fall", "feel", "find", "fly", "forget",
+    "get", "give", "go", "grow", "happen", "have", "hear", "help", "hold", "hope",
+    "keep", "know", "learn", "leave", "let", "like", "listen", "live", "look", "lose",
+    "love", "make", "mean", "meet", "move", "need", "open", "pay", "play", "put",
+    "read", "run", "say", "see", "seem", "sell", "send", "set", "show", "sit",
+    "sleep", "speak", "spend", "stand", "start", "stay", "stop", "study", "take", "talk",
+    "teach", "tell", "think", "travel", "try", "turn", "understand", "use", "wait", "walk",
+    "want", "watch", "win", "work", "write", "add", "agree", "answer", "begin", "belong",
+    "break", "build", "carry", "catch", "climb", "compare", "complete", "count", "decide", "deliver",
+    "describe", "design", "enjoy", "enter", "explain", "follow", "forget", "happen", "improve", "increase",
+    "join", "jump", "lead", "listen", "look", "move", "offer", "plan", "produce", "protect",
+    "reach", "receive", "remember", "return", "save", "send", "serve", "show", "sing", "sit",
+    "spend", "stand", "stop", "support", "take", "talk", "teach", "think", "touch", "travel",
+    "try", "understand", "use", "visit", "wait", "walk", "watch", "wish", "work", "write"
+]
+
+PAST_VERBS = ["went"]
+
+NOUNS = [
+    "name", "time", "year", "people", "way", "day", "man", "woman", "child", "world", "school",
+    "state", "family", "student", "group", "country", "problem", "hand", "part", "place", "case",
+    "week", "company", "system", "program", "question", "work", "night", "point", "home", "water",
+    "room", "mother", "area", "money", "story", "fact", "month", "lot", "right", "study",
+    "book", "eye", "job", "word", "business", "issue", "side", "kind", "head", "house",
+    "service", "friend", "father", "power", "hour", "game", "line", "end", "member", "law",
+    "car", "city", "community", "name", "president", "team", "minute", "idea", "kid", "body",
+    "information", "back", "parent", "face", "level", "office", "door", "health", "person",
+    "art", "war", "history", "party", "rsesult", "change", "morning", "reason", "research", "girl",
+    "guy", "moment", "air", "teacher", "force", "education", "foot", "boy", "age", "policy",
+    "music", "market", "sense", "nation", "plan", "college", "effect", "control", "field",
+    "care", "road", "science", "truth", "food", "movie", "dog", "cat", "tree", "river",
+    "mountain", "sea", "ocean", "computer", "phone", "internet", "paper", "pen", "letter", "song",
+    "language", "country", "city", "village", "farm", "garden", "building", "bridge", "church", "hospital",
+    "store", "restaurant", "hotel", "bank", "library", "park", "airport", "station", "train", "bus",
+    "plane", "ship", "road", "street", "room", "kitchen", "bathroom", "bed", "chair", "table",
+    "cup", "plate", "spoon", "fork", "knife", "bottle", "glass", "bag", "box", "key",
+    "lock", "door", "window", "wall", "floor", "ceiling", "roof", "light", "lamp", "candle",
+    "sun", "moon", "star", "sky", "cloud", "rain", "snow", "wind", "fire", "earth",
+    "air", "water", "stone", "metal", "wood", "sand", "soil", "flower", "leaf", "grass",
+    "fruit", "apple", "banana", "orange", "grape", "pear", "peach", "cherry", "melon", "berry",
+    "vegetable", "potato", "tomato", "onion", "carrot", "cabbage", "corn", "rice", "bread", "meat",
+    "fish", "egg", "milk", "cheese", "butter", "salt", "sugar", "oil", "coffee", "tea",
+    "friendship", "love", "peace", "hope", "dream", "fear", "anger", "happiness", "sadness", "strength",
+    "freedom", "justice", "truth", "faith", "trust", "honor", "courage", "memory", "thought", "idea",
+    "problem", "solution", "question", "answer", "plan", "goal", "project", "success", "failure", "lesson"
+]
+
+PREPS = [
+    "to","in","on","at","by","for","from","with","about","against","between","into",
+    "through","during","before","after","above","below","over","under","within","without",
+    "across","behind","beyond","near","since","until","upon","around","among","along",
+    "off","outside","inside","onto","past","per","via"
+]
+
+DETERMINERS = [
+    "the","a","an","my","your","his","her","our","their","this","that","these","those"
+]
+
+PRONOUNS = [
+    "i","you","he","she","it","we","they","me","him","her","us","them",
+    "my","your","his","her","our","their","mine","yours","hers","ours","theirs"
+]
+
+TIMEWORDS = [
+    "noon","midnight","morning","evening","afternoon","night","dawn","dusk",
+    "sunrise","sunset","today","tomorrow","tonight","yesterday","now","later"
+]
+
+class Query:
+    def __init__(self, text: str):
+        self.string = text
+        self.is_question = self.string.strip().endswith('?')
+        self.words = self.string.split()
+        self.clean = [word.strip('.,;:!?()"\'' ).lower() for word in self.words]
+        self.verbs = [word for word in self.words if word in PRESENT_VERBS] + [word for word in self.words if word in PAST_VERBS]
+        self.nouns = [word for word in self.words if word in NOUNS] + [word for word in self.words if word != word.lower()]
+        self.subject = self.words[0]
+        self.prepositional_phrases = self.findPrepositionalPhrases()
+
+    def stripString(self, w: str) -> str:
+        return w.strip('.,;:!?()\"\'').lower()
+
+    def findPrepositionalPhrases(self):
+        phrases = []
+  
+        for i in range(len(self.words)):
+            head_prep = self.stripString(self.words[i])
+            
+            if head_prep not in PREPS: continue
+            
+            j = i + 1
+            
+            while j < len(self.words) and self.stripString(self.words[j]) in DETERMINERS:
+                j += 1
+
+            seen_noun = False
+            seen_pronoun = False
+            seen_proper = False
+            
+            while j < len(self.words):
+                w_norm = self.stripString(self.words[j])
+                w_orig = self.words[j]
+                
+                if w_norm or w_norm[:-1] in NOUNS:
+                    seen_noun = True
+
+                if w_norm in PRONOUNS:
+                    seen_pronoun = True
+                    
+                if w_orig and w_orig[0].isupper():
+                    seen_proper = True
+
+                next_is_prep = (j + 1 < len(self.words) and self.stripString(self.words[j + 1]) in PREPS)
+                punct_end = w_orig.endswith((",", ";", ".", "?", "!", ":"))
+
+                j += 1
+                if punct_end or next_is_prep:
+                    break
+
+            if  seen_noun or (head_prep in {"at", "with"} and (seen_pronoun or seen_proper)):
+                phrases.append(" ".join(self.words[i:j]))
+  
+        return phrases
+
+class bot:
+    def __init__(self, text: str):
+        
+        self.query = Query(text)
+
+    def reply(self):
+
+        print("Question:", self.query.is_question)
+        print("Words:", self.query.words)
+        print("Verbs:", self.query.verbs)
+        print("Nouns:", self.query.nouns)
+        print("Subject:", self.query.subject)
+        print("Prepositional Phrases:", self.query.prepositional_phrases)
+
+def chat():
+    while True:
+        try:
+            print("")
+            text = input("> ")
+        except (EOFError, KeyboardInterrupt):
+            print("\nBye!")
+            break
+
+        b = bot(text)
+        b.reply()
+
+
+if __name__ == "__main__":
+    chat()
