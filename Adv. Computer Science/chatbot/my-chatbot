@@ -162,7 +162,7 @@ PRESENT_VERBS = [
     "write",
 ]
 
-PAST_VERBS = ["went", "ate", "liked", "ordered"]
+PAST_VERBS = ["went", "ate", "liked", "ordered", "saw"]
 
 NOUNS = [
     "name",
@@ -535,7 +535,7 @@ class Query:
         self.subject = self.infer_subject()
         self.prepositional_phrases = self.findPrepositionalPhrases()
         self.topic = next(
-            (n for n in self.nouns if n not in ["i", "you", "it", "this", "that"]), None
+            (n for n in self.nouns if n not in ["i", "you", "it", "this", "that"]), "it"
         )
 
     def infer_subject(self) -> str:
@@ -649,7 +649,7 @@ class bot:
         self.query = Query(text)
 
     def replyToStatement(self):
-        if not self.query.verbs:
+        if not self.query.verbs and not self.query.nouns:
             print("Tell me more.")
             return
 
@@ -665,24 +665,50 @@ class bot:
             rand = random.randint(0, 2)
             if rand == 0:
                 print(f"Why did {subj} go {asdf}?")
+                return
             elif rand == 1:
                 print(f"How did {subj} like going {asdf}?")
+                return
             else:
                 print(f"What did you do when {subj} went {asdf}?")
+                return
         elif self.query.verbs[0] in ["ate", "eat", "ordered", "order"]:
             print(f"Did {subj} enjoy the {obj}?")
+            return
         elif self.query.verbs[0] in ["like", "liked"]:
             print(f"Really! I like {obj} too!")
+            return
         elif self.query.verbs[0] in ["love", "loved"]:
             print(f"Really! I love {obj} too!")
+            return
         elif self.query.verbs[0] in ["enjoy", "enjoyed"]:
             print(f"Really! I enjoy {obj} too!")
+            return
         elif self.query.verbs[0] in ["hate", "hated"]:
             print(f"Really! I hate {obj} too!")
+            return
         elif self.query.verbs[0] in ["want", "wanted"]:
             print(f"Wow, you must want it a lot!")
+            return
+
+
+        templates = []
+        if self.query.verbs[0]:
+            templates.extend([
+                lambda: f"What made {subj} {self.query.verbs[0]} {asdf}?".strip(),
+                lambda: f"How did {subj} feel about {obj}?",
+                lambda: f"Can you share more details about {obj} {asdf}?".strip(),
+                lambda: f"What happened after {subj} {self.query.verbs[0]} {asdf}?".strip(),
+                lambda: f"Why was {obj} important to {subj}?",
+            ])
         else:
-            print(f"Interesting! Tell me more about that.")
+            templates.extend([
+                lambda: f"What makes {obj} stand out to you?" if subj == "you" else f"What makes {obj} stand out to {subj}?",
+                lambda: f"Can you tell me more about {obj} {asdf}?".strip(),
+                lambda: "What happened next?",
+            ])
+
+        print(random.choice(templates)())
 
     def replytoQuestion(self):
         rand = random.randint(0, 2)
@@ -720,7 +746,7 @@ def chat():
         try:
             print("")
             text = input("> ")
-        except EOFError:
+        except (EOFError, KeyboardInterrupt):
             print("\nBye!")
             break
 
